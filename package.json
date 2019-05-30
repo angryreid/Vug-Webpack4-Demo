@@ -23,6 +23,7 @@
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
     "open-browser-webpack-plugin": "0.0.5",
+    "prerender-spa-plugin": "^3.4.0",
     "require": "^2.4.20",
     "script-loader": "^0.7.0",
     "style-loader": "^0.21.0",
