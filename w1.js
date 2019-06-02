@@ -3,8 +3,6 @@ var DIST_BASE_URL = "/dist";
 var webpack = require("webpack");
 var OpenBrowserPlugin = require("open-browser-webpack-plugin");
 var CleanWebpackPlugin = require("clean-webpack-plugin");
-var UglifyJSPlugin = require("uglifyjs-webpack-plugin");
-var PrerenderSPAPlugin = require("prerender-spa-plugin"); //引用插件
 
 var log = console.log;
 var spawn = require("child_process").spawn;
@@ -182,16 +180,20 @@ CreateHtml.prototype.apply = function(compiler) {
   webpackEntrys.common = ["vue"]; //每个项目各不相同，根本每个项目不同增加或删除要提取的公共部分
 })();
 
-webpackPlugins.push(new CreateHtml());
+new webpack.optimize.CommonsChunkPlugin({
+  name: "manifest",
+  chunks: ["app", "vendor"] // 或者不写这一行，默认全部chunk
+});
+
+// webpackPlugins.push(new webpack.optimize.CommonsChunkPlugin('common.[hash].js',['common']));
 webpackPlugins.push(
-  new PrerenderSPAPlugin({
-    staticDir: path.join(__dirname, '/dist'),
-    routes: ['/user'],
-    renderer: new PrerenderSPAPlugin.PuppeteerRenderer({//这样写renderAfterTime生效了
-      renderAfterTime: 5000
-    })
+  new webpack.optimize.CommonsChunkPlugin({
+    name: "common",
+    chunks: ["common"]
   })
 );
+
+webpackPlugins.push(new CreateHtml());
 
 if (!isDebug) {
   if (!isBuildOne) {
@@ -209,6 +211,18 @@ if (!isDebug) {
       })
     );
   }
+  webpackPlugins.push(
+    new webpack.optimize.UglifyJsPlugin({
+      sourceMap: false,
+      parallel: 8,
+      output: {
+        comments: false // remove all comments
+      },
+      compress: {
+        warnings: false
+      }
+    })
+  );
 } else {
   webpackPlugins.push(new OpenBrowserPlugin({ url: "http://localhost:9876" }));
   webpackPlugins.push(new webpack.HotModuleReplacementPlugin());
@@ -221,7 +235,6 @@ var webpack_config = {
     filename: isDebug ? "[name].js" : "[name].[chunkhash].js",
     path: path.join(__dirname, "dist")
   },
-
   module: {
     rules: [
       {
@@ -270,41 +283,17 @@ var webpack_config = {
           }
         }
       }
-    ]
-  },
+    ],
   resolve: {
     alias: {
       //每个项目各不相同，可自行增加别名
       // 'jquery':'jquery/dist/jquery.min.js',
       vue$: "vue/dist/vue.common.js",
-      "@": path.resolve(__dirname, "src")
+      '@': path.resolve(__dirname, 'src')
     }
   },
   plugins: webpackPlugins,
-  optimization: {
-    splitChunks: {
-      cacheGroups: {
-        commons: {
-          name: "common",
-          chunks: "initial"
-        }
-      }
-    },
-    minimizer: [
-      new UglifyJSPlugin({
-        uglifyOptions: {
-          sourceMap: false,
-          parallel: 8,
-          output: {
-            comments: false
-          },
-          compress: {
-            warnings: false
-          }
-        }
-      })
-    ]
-  },
+
   devServer: {
     historyApiFallback: true,
     hot: true,
@@ -315,9 +304,7 @@ var webpack_config = {
     disableHostCheck: true,
     proxy: {
       "/sites/api": {
-        target: "http://192.168.25.75:8080", //测试环境
-        // 'target': 'http://192.168.25.76:10080',//开发环境
-        // 'target': 'http://activeapp.goldrock.cn',//线上环境
+        'target': 'http://192.168.xx.xx:8080',//测试环境
         changeOrigin: true,
         secure: false
       }
