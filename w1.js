@@ -235,55 +235,26 @@ var webpack_config = {
     filename: isDebug ? "[name].js" : "[name].[chunkhash].js",
     path: path.join(__dirname, "dist")
   },
+
   module: {
-    rules: [
-      {
-        test: /\.vue$/,
-        use: [{ loader: "vue-loader" }]
-      },
-      {
-        test: /\.js[x]?$/,
-        exclude: /node_modules/,
-        use: [{ loader: "babel-loader" }]
-      },
-      {
-        test: /\.less$/,
-        use: [
-          {
-            loader: "style-loader"
-          },
-          {
-            loader: "css-loader"
-          },
-          {
-            loader: "less-loader"
-          }
-        ]
-      },
-      {
-        test: /\.css$/,
-        use: [
-          {
-            loader: "style-loader"
-          },
-          {
-            loader: "css-loader"
-          }
-        ]
-      },
+    loaders: [
+      { test: /\.js[x]?$/, exclude: /node_modules/, loader: "babel" },
+      { test: /\.vue$/, loader: "vue" },
+      { test: /\.less$/, loader: "style!css!less" },
+      { test: /\.css$/, loader: "style-loader!css-loader" },
       {
         test: /\.(png|jpg|gif|eot|svg|ttf|woff|woff2)/,
-        use: {
-          loader: "file-loader",
-          options: {
-            name: isDebug ? "../[name].[hash].[ext]" : "[name].[hash].[ext]",
-            limit: 5000, // fonts file size <= 5KB, use 'base64'; else, output svg file
-            publicPath: "../assets/",
-            outputPath: "./assets/"
-          }
-        }
+        loader:
+          "file-loader?limit=5000&name=" +
+          (isDebug
+            ? "../[name].[hash].[ext]"
+            : "[name].[hash].[ext]&publicPath=../assets/&outputPath=./assets/")
       }
-    ],
+    ]
+  },
+  babel: {
+    presets: ["es2015"]
+  },
   resolve: {
     alias: {
       //每个项目各不相同，可自行增加别名
@@ -304,7 +275,9 @@ var webpack_config = {
     disableHostCheck: true,
     proxy: {
       "/sites/api": {
-        'target': 'http://192.168.xx.xx:8080',//测试环境
+        'target': 'http://192.168.25.75:8080',//测试环境
+        // 'target': 'http://192.168.25.76:10080',//开发环境
+        // 'target': 'http://activeapp.goldrock.cn',//线上环境
         changeOrigin: true,
         secure: false
       }
