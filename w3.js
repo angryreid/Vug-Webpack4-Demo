@@ -7,16 +7,14 @@ var CleanWebpackPlugin = require("clean-webpack-plugin");
 var log = console.log;
 var spawn = require("child_process").spawn;
 
-// prod
-var isDebug = false;
+var isDebug = true;
 
 var arguments = process.argv.splice(2);
 var arguments_str = arguments.join(" ");
 var isBuildOne = arguments[1] ? true : false;
 
-if (arguments_str.indexOf("--port") != -1) {
-  // dev
-  isDebug = true;
+if (arguments_str.indexOf("-p") != -1) {
+  isDebug = false;
 }
 
 var path = require("path");
@@ -289,9 +287,7 @@ var webpack_config = {
     disableHostCheck: true,
     proxy: {
       "/sites/api": {
-        'target': 'url',//测试环境
-        // 'target': 'url',//开发环境
-        // 'target': 'url,//线上环境
+        'target': 'http://192.168.XX.XX:8080',
         changeOrigin: true,
         secure: false
       }

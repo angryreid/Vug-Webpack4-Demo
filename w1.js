@@ -275,9 +275,7 @@ var webpack_config = {
     disableHostCheck: true,
     proxy: {
       "/sites/api": {
-        'target': 'http://192.168.25.75:8080',//测试环境
-        // 'target': 'http://192.168.25.76:10080',//开发环境
-        // 'target': 'http://activeapp.goldrock.cn',//线上环境
+        'target': 'http://192.168.XX.XX:8080',
         changeOrigin: true,
         secure: false
       }

@@ -6,8 +6,5 @@ new Vue({
 	el: '#app',
 	components: {
 		vugPage,
-	},
-	mounted() {
-    document.dispatchEvent(new Event('render-event'))
-  }
+	}
 })
