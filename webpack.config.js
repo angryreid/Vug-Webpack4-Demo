@@ -3,6 +3,8 @@ var DIST_BASE_URL = "/dist";
 var webpack = require("webpack");
 var OpenBrowserPlugin = require("open-browser-webpack-plugin");
 var CleanWebpackPlugin = require("clean-webpack-plugin");
+var PrerenderSPAPlugin = require("prerender-spa-plugin");
+const Renderer = PrerenderSPAPlugin.PuppeteerRenderer;
 
 var log = console.log;
 var spawn = require("child_process").spawn;
@@ -225,6 +227,16 @@ if (!isDebug) {
       }
     })
   );
+  webpackPlugins.push(
+    new PrerenderSPAPlugin({
+      staticDir: path.join(__dirname, "dist/user"),
+      routes: ["/add"],
+      renderer: new Renderer({
+        headless: true,
+        renderAfterDocumentEvent: "render-event"
+      })
+    })
+  );
 } else {
   webpackPlugins.push(new OpenBrowserPlugin({ url: "http://localhost:9876" }));
   webpackPlugins.push(new webpack.HotModuleReplacementPlugin());
@@ -260,12 +272,12 @@ var webpack_config = {
       {
         test: /\.(png|jpg|gif|eot|svg|ttf|woff|woff2)/,
         loader: "file-loader",
-          options: {
-            name: isDebug ? "../[name].[hash].[ext]" : "[name].[hash].[ext]",
-            limit: 5000, // fonts file size <= 5KB, use 'base64'; else, output svg file
-            publicPath: "../assets/",
-            outputPath: "./assets/"
-          }
+        options: {
+          name: isDebug ? "../[name].[hash].[ext]" : "[name].[hash].[ext]",
+          limit: 5000, // fonts file size <= 5KB, use 'base64'; else, output svg file
+          publicPath: "../assets/",
+          outputPath: "./assets/"
+        }
       }
     ]
   },
@@ -274,7 +286,7 @@ var webpack_config = {
       //每个项目各不相同，可自行增加别名
       // 'jquery':'jquery/dist/jquery.min.js',
       vue$: "vue/dist/vue.common.js",
-      '@': path.resolve(__dirname, 'src')
+      "@": path.resolve(__dirname, "src")
     }
   },
   plugins: webpackPlugins,
@@ -289,7 +301,7 @@ var webpack_config = {
     disableHostCheck: true,
     proxy: {
       "/sites/api": {
-        'target': 'url',//测试环境
+        target: "url", //测试环境
         // 'target': 'url',//开发环境
         // 'target': 'url,//线上环境
         changeOrigin: true,
