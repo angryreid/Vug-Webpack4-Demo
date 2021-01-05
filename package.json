@@ -10,7 +10,7 @@
     "build": "rimraf dist && webpack -p"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "babel-core": "^6.9.1",
     "babel-loader": "^6.2.4",
     "babel-plugin-transform-runtime": "^6.9.0",
